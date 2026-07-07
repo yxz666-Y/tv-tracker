@@ -7,6 +7,169 @@
 // ==================== CONFIG ====================
 var API_BASE = 'https://api.tvmaze.com';
 
+// ==================== 中英文剧名对照表 ====================
+var CN_MAP = {
+  '绝命毒师': 'Breaking Bad',
+  '风骚律师': 'Better Call Saul',
+  '怪奇物语': 'Stranger Things',
+  '权力的游戏': 'Game of Thrones',
+  '行尸走肉': 'The Walking Dead',
+  '越狱': 'Prison Break',
+  '老友记': 'Friends',
+  '生活大爆炸': 'The Big Bang Theory',
+  '破产姐妹': '2 Broke Girls',
+  '纸牌屋': 'House of Cards',
+  '黑镜': 'Black Mirror',
+  '西部世界': 'Westworld',
+  '切尔诺贝利': 'Chernobyl',
+  '后翼弃兵': "The Queen's Gambit",
+  '女王的棋局': "The Queen's Gambit",
+  '曼达洛人': 'The Mandalorian',
+  '最后生还者': 'The Last of Us',
+  '龙之家族': 'House of the Dragon',
+  '继承之战': 'Succession',
+  '白莲花度假村': 'The White Lotus',
+  '熊家餐馆': 'The Bear',
+  '熊': 'The Bear',
+  '人生切割术': 'Severance',
+  '离职': 'Severance',
+  '黑暗物质': 'His Dark Materials',
+  '猎魔人': 'The Witcher',
+  '巫师': 'The Witcher',
+  '看见': 'See',
+  '基地': 'Foundation',
+  '羊毛战记': 'Silo',
+  '末日孤舰': 'The Last Ship',
+  '神盾局特工': 'Agents of S.H.I.E.L.D.',
+  '绿箭侠': 'Arrow',
+  '闪电侠': 'The Flash',
+  '哥谭': 'Gotham',
+  '传教士': 'Preacher',
+  '美国恐怖故事': 'American Horror Story',
+  '真探': 'True Detective',
+  '毒枭': 'Narcos',
+  '王冠': 'The Crown',
+  '浴血黑帮': 'Peaky Blinders',
+  '杀死伊芙': 'Killing Eve',
+  '使女的故事': "The Handmaid's Tale",
+  '大小谎言': 'Big Little Lies',
+  '摩登家庭': 'Modern Family',
+  '无耻之徒': 'Shameless',
+  '我们这一天': 'This Is Us',
+  '万物生灵': 'All Creatures Great and Small',
+  '唐顿庄园': 'Downton Abbey',
+  '神探夏洛克': 'Sherlock',
+  '黑道家族': 'The Sopranos',
+  '火线': 'The Wire',
+  '广告狂人': 'Mad Men',
+  '绝命律师': 'Better Call Saul',
+  '爱死机': 'Love Death Robots',
+  '爱死亡和机器人': 'Love Death Robots',
+  '黑袍纠察队': 'The Boys',
+  '无敌少侠': 'Invincible',
+  '瑞克和莫蒂': 'Rick and Morty',
+  '马男波杰克': 'BoJack Horseman',
+  '英雄': 'Heroes',
+  '迷失': 'Lost',
+  '24小时': '24',
+  '斯巴达克斯': 'Spartacus',
+  '罗马': 'Rome',
+  '兄弟连': 'Band of Brothers',
+  '太平洋战争': 'The Pacific',
+  '新闻编辑室': 'The Newsroom',
+  '硅谷': 'Silicon Valley',
+  '副总统': 'Veep',
+  '公园与游憩': 'Parks and Recreation',
+  '办公室': 'The Office',
+  '废柴联盟': 'Community',
+  '发展受阻': 'Arrested Development',
+  '我为喜剧狂': '30 Rock',
+  '老爸老妈的浪漫史': 'How I Met Your Mother',
+  '好汉两个半': 'Two and a Half Men',
+  '犯罪心理': 'Criminal Minds',
+  '识骨寻踪': 'Bones',
+  '灵书妙探': 'Castle',
+  '基本演绎法': 'Elementary',
+  '疑犯追踪': 'Person of Interest',
+  '冰血暴': 'Fargo',
+  '汉尼拔': 'Hannibal',
+  '双峰': 'Twin Peaks',
+  '超感猎杀': 'Sense8',
+  '黑钱胜地': 'Ozark',
+  '心灵猎人': 'Mindhunter',
+  '暗黑': 'Dark',
+  '纸钞屋': 'Money Heist',
+  '鱿鱼游戏': 'Squid Game',
+  '甜蜜家园': 'Sweet Home',
+  '弥留之国的爱丽丝': 'Alice in Borderland',
+  '和平使者': 'Peacemaker',
+  '月光骑士': 'Moon Knight',
+  '旺达幻视': 'WandaVision',
+  '洛基': 'Loki',
+  '鹰眼': 'Hawkeye',
+  '猎鹰与冬兵': 'The Falcon and the Winter Soldier',
+  '假如': 'What If',
+  '安多': 'Andor',
+  '欧比旺': 'Obi-Wan Kenobi',
+  '波巴费特之书': 'The Book of Boba Fett',
+  '伞学院': 'The Umbrella Academy',
+  '你': 'You',
+  '安眠书店': 'You',
+  '怪盗': 'Lupin',
+  '亚森罗宾': 'Lupin',
+  '睡魔': 'The Sandman',
+  '星期三': 'Wednesday',
+  '怒呛人生': 'Beef',
+  '夜访吸血鬼': 'Interview with the Vampire',
+  '流人': 'Slow Horses',
+  '足球教练': 'Ted Lasso',
+  '早间新闻': 'The Morning Show',
+  '为全人类': 'For All Mankind',
+  '弹珠游戏': 'Pachinko',
+  '边缘世界': 'The Peripheral',
+  '辐射': 'Fallout',
+  '三个机器人': 'Three Robots',
+  '副本': 'Altered Carbon',
+  '星际迷航发现号': 'Star Trek Discovery',
+  '星际迷航皮卡德': 'Star Trek Picard',
+  '曼达洛': 'The Mandalorian',
+  '行尸之惧': 'Fear the Walking Dead',
+  '血族': 'The Strain',
+  '美国众神': 'American Gods',
+  '好兆头': 'Good Omens',
+  '路西法': 'Lucifer',
+  '邪恶力量': 'Supernatural',
+  '吸血鬼日记': 'The Vampire Diaries',
+  '初代吸血鬼': 'The Originals',
+  '真爱如血': 'True Blood',
+  '都铎王朝': 'The Tudors',
+  '波吉亚家族': 'The Borgias',
+  '维京传奇': 'Vikings',
+  '孤国春秋': 'The Last Kingdom',
+  '权游': 'Game of Thrones',
+  '毒师': 'Breaking Bad',
+  '律师': 'Better Call Saul',
+  '行尸': 'The Walking Dead',
+  '黑镜网': 'Black Mirror',
+  '西部': 'Westworld',
+};
+
+function translateQuery(q) {
+  var trimmed = q.trim();
+  // Exact match in CN_MAP
+  if (CN_MAP[trimmed]) return CN_MAP[trimmed];
+  // Fuzzy match: check if input contains any key
+  var keys = Object.keys(CN_MAP).sort(function(a,b) { return b.length - a.length; });
+  for (var i = 0; i < keys.length; i++) {
+    if (trimmed.indexOf(keys[i]) >= 0) {
+      // Replace only the Chinese part
+      return CN_MAP[keys[i]];
+    }
+  }
+  // Also try: if it's purely Chinese characters, maybe search anyway
+  return trimmed;
+}
+
 // ==================== State ====================
 var State = {
   currentShow: null,
@@ -87,10 +250,12 @@ function setupSearch() {
     if (q.length < 2) { dropdown.classList.remove('show'); return; }
 
     searchTimer = setTimeout(function() {
-      dropdown.innerHTML = '<div style="padding:14px;color:var(--text-dim);text-align:center;">🔍 搜索中...</div>';
+      var query = translateQuery(q);
+      var hint = query !== q ? ' ("' + escapeHtml(q) + '" → "' + escapeHtml(query) + '")' : '';
+      dropdown.innerHTML = '<div style="padding:14px;color:var(--text-dim);text-align:center;">🔍 搜索中...' + hint + '</div>';
       dropdown.classList.add('show');
 
-      apiFetch('/search/shows?q=' + encodeURIComponent(q))
+      apiFetch('/search/shows?q=' + encodeURIComponent(query))
         .then(function(results) {
           results = (results || []).slice(0, 8);
           if (results.length === 0) {
@@ -406,7 +571,8 @@ function setupIO() {
 function setupQuickButtons() {
   document.querySelectorAll('.quick-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      apiFetch('/search/shows?q=' + encodeURIComponent(btn.dataset.query))
+      var query = translateQuery(btn.dataset.query);
+      apiFetch('/search/shows?q=' + encodeURIComponent(query))
         .then(function(results) {
           if (results && results.length > 0) {
             loadShowDetail(results[0].show.id);
