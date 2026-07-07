@@ -209,6 +209,7 @@ function renderShowDetail(show, seasons) {
           '<div class="dh-progress-bar"><div class="dh-progress-fill" style="width:' + pct + '%"></div></div>' +
           '<div class="dh-progress-text">追剧进度: ' + progress.watched + '/' + progress.total + ' 集 (' + pct + '%)</div>' +
         '</div>' +
+        (State.watchedData[show.id] ? '<button class="btn-sm" id="removeShowBtn" style="margin-top:8px;color:#f85149;border-color:#f85149;">🗑️ 删除追剧记录</button>' : '') +
       '</div>' +
     '</div>' +
     '<div class="season-tabs" id="seasonTabs">' +
@@ -232,6 +233,16 @@ function renderShowDetail(show, seasons) {
     State.currentSeason = parseInt(tab.dataset.season);
     renderShowDetail(show, seasons);
   });
+
+  // Bind remove show button
+  var removeBtn = el('removeShowBtn');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', function() {
+      if (confirm('确定要删除 ' + show.name + ' 的追剧记录吗？')) {
+        removeShow(show.id);
+      }
+    });
+  }
 
   // Bind select all
   el('selectAllToggle').addEventListener('click', function() {
@@ -305,6 +316,15 @@ function toggleAllEpisodes(showId, showName, seasonNum, episodes) {
 }
 
 // ==================== Sidebar ====================
+function removeShow(showId) {
+  delete State.watchedData[showId];
+  saveWatched();
+  if (State.currentShow && State.currentShow.id === parseInt(showId)) {
+    goBack();
+  }
+  renderSidebar();
+}
+
 function renderSidebar() {
   var container = el('myShowsList');
   var entries = Object.keys(State.watchedData).filter(function(k) { return k.charAt(0) !== '_'; });
@@ -320,15 +340,28 @@ function renderSidebar() {
     var pct = progress.total > 0 ? Math.round(progress.watched / progress.total * 100) : 0;
     var isActive = State.currentShow && State.currentShow.id === parseInt(showId);
     return '<div class="my-show-item' + (isActive ? ' active' : '') + '" data-id="' + showId + '">' +
+      '<button class="ms-delete" data-del="' + showId + '" title="删除">×</button>' +
       '<div class="ms-name">' + escapeHtml(show.name || '未知') + '</div>' +
       '<div class="ms-progress"><div class="ms-progress-fill" style="width:' + pct + '%"></div></div>' +
       '<div class="ms-info">' + progress.watched + '/' + progress.total + ' 集 (' + pct + '%)</div>' +
     '</div>';
   }).join('');
 
+  // Click on show item → open detail
   container.querySelectorAll('.my-show-item').forEach(function(item) {
-    item.addEventListener('click', function() {
+    item.addEventListener('click', function(e) {
+      if (e.target.closest('.ms-delete')) return;
       loadShowDetail(parseInt(item.dataset.id));
+    });
+  });
+
+  // Click delete button → remove show
+  container.querySelectorAll('.ms-delete').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (confirm('确定要删除这部剧的追剧记录吗？')) {
+        removeShow(btn.dataset.del);
+      }
     });
   });
 }
