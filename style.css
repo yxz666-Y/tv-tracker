@@ -122,6 +122,23 @@ a{color:var(--accent);text-decoration:none}
 .sd-watchlist:hover{background:var(--accent-yellow);color:#000}
 .sd-watchlist.in-list{background:var(--accent-yellow);color:#000}
 
+/* Type badge */
+.type-badge{
+  display:inline-block;padding:2px 8px;border-radius:10px;
+  font-size:0.72rem;font-weight:600;text-transform:uppercase
+}
+.type-movie{background:rgba(88,166,255,0.15);color:var(--accent)}
+.type-tv{background:rgba(63,185,80,0.15);color:var(--accent-green)}
+
+/* Movie watched toggle */
+.movie-toggle{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;border:2px solid var(--border);border-radius:24px;
+  cursor:pointer;font-size:1rem;transition:all .15s;margin:10px 0
+}
+.movie-toggle:hover{border-color:var(--accent-green)}
+.movie-toggle.watched{background:var(--accent-green);border-color:var(--accent-green);color:#fff}
+
 /* ========== Main ========== */
 .main-content{flex:1;min-width:0}
 
