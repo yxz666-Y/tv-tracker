@@ -17,15 +17,27 @@
   </header>
 
   <div class="app-container">
-    <!-- 侧边栏：我的追剧列表 -->
+    <!-- 侧边栏 -->
     <aside class="sidebar" id="sidebar">
-      <h2>📋 我的追剧</h2>
-      <div id="myShowsList" class="my-shows-list">
-        <p class="empty-hint">搜索并点开一部剧，<br>标记已看后自动出现在这里</p>
+      <!-- 追剧中 -->
+      <div class="sidebar-section">
+        <h2>📋 追剧中</h2>
+        <div id="myShowsList" class="my-shows-list">
+          <p class="empty-hint">标记已看后<br>自动出现在这里</p>
+        </div>
       </div>
-      <button id="exportBtn" class="btn-sm" title="导出数据">💾 导出</button>
-      <button id="importBtn" class="btn-sm" title="导入数据">📥 导入</button>
-      <input type="file" id="importFile" accept=".json" style="display:none">
+      <!-- 我的片单（待看） -->
+      <div class="sidebar-section">
+        <h2>🎬 我的片单</h2>
+        <div id="watchlistList" class="my-shows-list">
+          <p class="empty-hint">搜索美剧 → 加入片单<br>想看的时候再翻出来</p>
+        </div>
+      </div>
+      <div class="sidebar-actions">
+        <button id="exportBtn" class="btn-sm" title="导出数据">💾 导出</button>
+        <button id="importBtn" class="btn-sm" title="导入数据">📥 导入</button>
+        <input type="file" id="importFile" accept=".json" style="display:none">
+      </div>
     </aside>
 
     <!-- 主内容 -->

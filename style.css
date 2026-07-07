@@ -82,6 +82,9 @@ a{color:var(--accent);text-decoration:none}
 .my-show-item .ms-progress-fill{height:100%;background:var(--accent-green);border-radius:2px;transition:width .3s}
 .my-show-item .ms-info{font-size:0.75rem;color:var(--text-dim);margin-top:4px}
 .my-show-item.active{border-color:var(--accent)}
+.sidebar-section{margin-bottom:16px}
+.sidebar-section h2{font-size:0.95rem;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sidebar-actions{margin-top:auto;padding-top:10px;border-top:1px solid var(--border)}
 .my-show-item{position:relative}
 .ms-delete{
   position:absolute;top:4px;right:6px;
@@ -99,6 +102,25 @@ a{color:var(--accent);text-decoration:none}
   color:var(--text);font-size:0.78rem;cursor:pointer;margin-right:6px;transition:all .15s
 }
 .btn-sm:hover{background:var(--bg-hover);border-color:var(--accent)}
+
+/* Watchlist button */
+.btn-watchlist{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 12px;border:1px solid var(--accent-yellow);border-radius:16px;
+  background:transparent;color:var(--accent-yellow);cursor:pointer;
+  font-size:0.8rem;transition:all .15s;margin-top:6px
+}
+.btn-watchlist:hover{background:rgba(210,153,29,0.1)}
+.btn-watchlist.in-list{background:var(--accent-yellow);color:#000;border-color:var(--accent-yellow)}
+
+.sd-watchlist{
+  background:rgba(0,0,0,0.5);border:1px solid var(--accent-yellow);border-radius:50%;
+  width:26px;height:26px;color:var(--accent-yellow);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  transition:all .15s;flex-shrink:0
+}
+.sd-watchlist:hover{background:var(--accent-yellow);color:#000}
+.sd-watchlist.in-list{background:var(--accent-yellow);color:#000}
 
 /* ========== Main ========== */
 .main-content{flex:1;min-width:0}

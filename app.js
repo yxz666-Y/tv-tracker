@@ -176,6 +176,7 @@ var State = {
   currentSeason: 1,
   allEpisodes: [],      // cache all episodes for current show
   watchedData: loadWatched(),
+  watchlist: loadWatchlist(),
 };
 
 // ==================== localStorage ====================
@@ -225,6 +226,42 @@ function getShowProgress(showId) {
   return { watched: watched, total: total > 0 ? total : watched };
 }
 
+// ==================== Watchlist ====================
+function loadWatchlist() {
+  try { return JSON.parse(localStorage.getItem('tv_watchlist')) || {}; }
+  catch(e) { return {}; }
+}
+
+function saveWatchlist() {
+  localStorage.setItem('tv_watchlist', JSON.stringify(State.watchlist));
+}
+
+function isInWatchlist(showId) {
+  return !!State.watchlist[showId];
+}
+
+function toggleWatchlist(showId, showName) {
+  if (State.watchlist[showId]) {
+    delete State.watchlist[showId];
+  } else {
+    State.watchlist[showId] = { name: showName, addedAt: new Date().toISOString().slice(0,10) };
+  }
+  saveWatchlist();
+  renderSidebar();
+  // Update detail page button if viewing this show
+  if (State.currentShow && State.currentShow.id === showId) {
+    updateWatchlistBtn(showId);
+  }
+}
+
+function updateWatchlistBtn(showId) {
+  var btn = el('watchlistBtn');
+  if (!btn) return;
+  var inList = isInWatchlist(showId);
+  btn.textContent = inList ? '📌 移出片单' : '🎬 加入片单';
+  btn.className = 'btn-watchlist' + (inList ? ' in-list' : '');
+}
+
 // ==================== API ====================
 function apiFetch(path) {
   return fetch(API_BASE + path)
@@ -270,18 +307,38 @@ function setupSearch() {
               : '<div class="sd-placeholder">📺</div>';
             var year = s.premiered ? s.premiered.slice(0,4) : '';
             var rating = s.rating && s.rating.average ? '⭐' + s.rating.average : '';
-            return '<div class="sd-item" data-id="' + s.id + '">' +
+            var inWL = isInWatchlist(s.id);
+            return '<div class="sd-item" data-id="' + s.id + '" style="position:relative">' +
               poster +
-              '<div><div class="sd-name">' + escapeHtml(s.name) + '</div>' +
-              '<div class="sd-meta">' + year + ' ' + rating + ' · ' + (s.status || '') + '</div>' +
-              '</div></div>';
+              '<div style="flex:1"><div class="sd-name">' + escapeHtml(s.name) + '</div>' +
+              '<div class="sd-meta">' + year + ' ' + rating + ' · ' + (s.status || '') + '</div></div>' +
+              '<button class="sd-watchlist' + (inWL ? ' in-list' : '') + '" data-wl="' + s.id + '" title="' + (inWL ? '移出片单' : '加入片单') + '">' + (inWL ? '📌' : '➕') + '</button>' +
+            '</div>';
           }).join('');
 
           dropdown.querySelectorAll('.sd-item').forEach(function(item) {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function(e) {
+              // Don't trigger if clicking the watchlist button
+              if (e.target.closest('.sd-watchlist')) return;
               loadShowDetail(parseInt(item.dataset.id));
               dropdown.classList.remove('show');
               input.value = '';
+            });
+          });
+
+          // Bind watchlist quick buttons
+          dropdown.querySelectorAll('.sd-watchlist').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var sid = parseInt(btn.dataset.wl);
+              var showName = '';
+              results.forEach(function(r) { if (r.show.id === sid) showName = r.show.name; });
+              toggleWatchlist(sid, showName);
+              // Update button appearance
+              var inWL = isInWatchlist(sid);
+              btn.className = 'sd-watchlist' + (inWL ? ' in-list' : '');
+              btn.title = inWL ? '移出片单' : '加入片单';
+              btn.textContent = inWL ? '📌' : '➕';
             });
           });
         }).catch(function(err) {
@@ -374,6 +431,7 @@ function renderShowDetail(show, seasons) {
           '<div class="dh-progress-bar"><div class="dh-progress-fill" style="width:' + pct + '%"></div></div>' +
           '<div class="dh-progress-text">追剧进度: ' + progress.watched + '/' + progress.total + ' 集 (' + pct + '%)</div>' +
         '</div>' +
+        '<button class="btn-watchlist' + (isInWatchlist(show.id) ? ' in-list' : '') + '" id="watchlistBtn">' + (isInWatchlist(show.id) ? '📌 移出片单' : '🎬 加入片单') + '</button>' +
         (State.watchedData[show.id] ? '<button class="btn-sm" id="removeShowBtn" style="margin-top:8px;color:#f85149;border-color:#f85149;">🗑️ 删除追剧记录</button>' : '') +
       '</div>' +
     '</div>' +
@@ -398,6 +456,14 @@ function renderShowDetail(show, seasons) {
     State.currentSeason = parseInt(tab.dataset.season);
     renderShowDetail(show, seasons);
   });
+
+  // Bind watchlist button
+  var wlBtn = el('watchlistBtn');
+  if (wlBtn) {
+    wlBtn.addEventListener('click', function() {
+      toggleWatchlist(show.id, show.name);
+    });
+  }
 
   // Bind remove show button
   var removeBtn = el('removeShowBtn');
@@ -491,44 +557,74 @@ function removeShow(showId) {
 }
 
 function renderSidebar() {
-  var container = el('myShowsList');
+  // === 追剧中 ===
+  var watching = el('myShowsList');
   var entries = Object.keys(State.watchedData).filter(function(k) { return k.charAt(0) !== '_'; });
 
   if (entries.length === 0) {
-    container.innerHTML = '<p class="empty-hint">搜索并点开一部剧，<br>标记已看后自动出现在这里</p>';
-    return;
+    watching.innerHTML = '<p class="empty-hint">标记已看后<br>自动出现在这里</p>';
+  } else {
+    watching.innerHTML = entries.map(function(showId) {
+      var show = State.watchedData[showId];
+      var progress = getShowProgress(showId);
+      var pct = progress.total > 0 ? Math.round(progress.watched / progress.total * 100) : 0;
+      var isActive = State.currentShow && State.currentShow.id === parseInt(showId);
+      return '<div class="my-show-item' + (isActive ? ' active' : '') + '" data-id="' + showId + '">' +
+        '<button class="ms-delete" data-del="' + showId + '" title="删除">×</button>' +
+        '<div class="ms-name">' + escapeHtml(show.name || '未知') + '</div>' +
+        '<div class="ms-progress"><div class="ms-progress-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="ms-info">' + progress.watched + '/' + progress.total + ' 集 (' + pct + '%)</div>' +
+      '</div>';
+    }).join('');
+
+    watching.querySelectorAll('.my-show-item').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        if (e.target.closest('.ms-delete')) return;
+        loadShowDetail(parseInt(item.dataset.id));
+      });
+    });
+
+    watching.querySelectorAll('.ms-delete').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (confirm('确定要删除这部剧的追剧记录吗？')) {
+          removeShow(btn.dataset.del);
+        }
+      });
+    });
   }
 
-  container.innerHTML = entries.map(function(showId) {
-    var show = State.watchedData[showId];
-    var progress = getShowProgress(showId);
-    var pct = progress.total > 0 ? Math.round(progress.watched / progress.total * 100) : 0;
-    var isActive = State.currentShow && State.currentShow.id === parseInt(showId);
-    return '<div class="my-show-item' + (isActive ? ' active' : '') + '" data-id="' + showId + '">' +
-      '<button class="ms-delete" data-del="' + showId + '" title="删除">×</button>' +
-      '<div class="ms-name">' + escapeHtml(show.name || '未知') + '</div>' +
-      '<div class="ms-progress"><div class="ms-progress-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="ms-info">' + progress.watched + '/' + progress.total + ' 集 (' + pct + '%)</div>' +
-    '</div>';
-  }).join('');
+  // === 我的片单 ===
+  var wlContainer = el('watchlistList');
+  var wlIds = Object.keys(State.watchlist);
 
-  // Click on show item → open detail
-  container.querySelectorAll('.my-show-item').forEach(function(item) {
-    item.addEventListener('click', function(e) {
-      if (e.target.closest('.ms-delete')) return;
-      loadShowDetail(parseInt(item.dataset.id));
-    });
-  });
+  if (wlIds.length === 0) {
+    wlContainer.innerHTML = '<p class="empty-hint">搜索美剧 → 加入片单<br>想看的时候再翻出来</p>';
+  } else {
+    wlContainer.innerHTML = wlIds.map(function(showId) {
+      var show = State.watchlist[showId];
+      var isActive = State.currentShow && State.currentShow.id === parseInt(showId);
+      return '<div class="my-show-item' + (isActive ? ' active' : '') + '" data-id="' + showId + '">' +
+        '<button class="ms-delete" data-del-wl="' + showId + '" title="移出片单">×</button>' +
+        '<div class="ms-name">' + escapeHtml(show.name || '未知') + '</div>' +
+        '<div class="ms-info">📅 添加于 ' + (show.addedAt || '') + '</div>' +
+      '</div>';
+    }).join('');
 
-  // Click delete button → remove show
-  container.querySelectorAll('.ms-delete').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (confirm('确定要删除这部剧的追剧记录吗？')) {
-        removeShow(btn.dataset.del);
-      }
+    wlContainer.querySelectorAll('.my-show-item').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        if (e.target.closest('.ms-delete')) return;
+        loadShowDetail(parseInt(item.dataset.id));
+      });
     });
-  });
+
+    wlContainer.querySelectorAll('.ms-delete').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleWatchlist(btn.dataset.delWl, '');
+      });
+    });
+  }
 }
 
 // ==================== Navigation ====================
@@ -542,7 +638,8 @@ function goBack() {
 // ==================== Export / Import ====================
 function setupIO() {
   el('exportBtn').addEventListener('click', function() {
-    var blob = new Blob([JSON.stringify(State.watchedData, null, 2)], { type: 'application/json' });
+    var data = { watched: State.watchedData, watchlist: State.watchlist };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'tv-tracker-backup-' + new Date().toISOString().slice(0,10) + '.json';
@@ -557,8 +654,15 @@ function setupIO() {
     var reader = new FileReader();
     reader.onload = function(ev) {
       try {
-        State.watchedData = JSON.parse(ev.target.result);
-        saveWatched();
+        var data = JSON.parse(ev.target.result);
+        if (data.watched) {
+          State.watchedData = data.watched;
+          saveWatched();
+        }
+        if (data.watchlist) {
+          State.watchlist = data.watchlist;
+          saveWatchlist();
+        }
         renderSidebar();
         alert('导入成功！');
       } catch(err) { alert('导入失败：格式错误'); }
