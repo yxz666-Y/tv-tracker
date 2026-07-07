@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>追剧追踪器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 顶部搜索栏 -->
+  <header class="header">
+    <a class="logo" onclick="location.reload()">📺 追剧追踪器</a>
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" placeholder="搜索美剧，如 Breaking Bad、Stranger Things..." autocomplete="off">
+      <div id="searchDropdown" class="search-dropdown"></div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- 侧边栏：我的追剧列表 -->
+    <aside class="sidebar" id="sidebar">
+      <h2>📋 我的追剧</h2>
+      <div id="myShowsList" class="my-shows-list">
+        <p class="empty-hint">搜索并点开一部剧，<br>标记已看后自动出现在这里</p>
+      </div>
+      <button id="exportBtn" class="btn-sm" title="导出数据">💾 导出</button>
+      <button id="importBtn" class="btn-sm" title="导入数据">📥 导入</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="main-content" id="mainContent">
+      <!-- 搜索初始状态 -->
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">📺</div>
+        <h1>追剧追踪器</h1>
+        <p>搜索你正在追的美剧，标记已看集数，再也不忘记看到哪了</p>
+        <div class="quick-shows">
+          <span>试试热门：</span>
+          <button class="quick-btn" data-query="Breaking Bad">Breaking Bad</button>
+          <button class="quick-btn" data-query="Stranger Things">Stranger Things</button>
+          <button class="quick-btn" data-query="Game of Thrones">Game of Thrones</button>
+          <button class="quick-btn" data-query="The Last of Us">The Last of Us</button>
+          <button class="quick-btn" data-query="The Bear">The Bear</button>
+        </div>
+      </div>
+
+      <!-- 搜索结果 -->
+      <div id="searchResults" class="search-results" style="display:none"></div>
+
+      <!-- 剧集详情 -->
+      <div id="showDetail" class="show-detail" style="display:none">
+        <button id="backBtn" class="back-btn">← 返回</button>
+        <div id="detailContent"></div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    数据来源：<a href="https://www.themoviedb.org" target="_blank">TMDB</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
